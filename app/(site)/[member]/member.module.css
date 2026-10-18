@@ -1,0 +1,50 @@
+/* First screen on charcoal: name split to the corners, portrait on columns 10–12 */
+.hero { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); height: 100svh; min-height: 560px; }
+.say { position: absolute; left: calc(100% / 12 * 2); top: 40%; max-width: 30ch; }
+.say .lead + .lead { margin-top: 0.375rem; }
+.say :global(.button) { margin-top: 1.75rem; }
+.stack {
+  position: absolute; left: calc(100% / 12 * 7); top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 0.375rem; font-size: var(--step-small);
+}
+.stack a { text-decoration: none; padding-block: 0.25rem; }
+.stack a:hover { text-decoration: underline; }
+.portrait { grid-column: 10 / 13; height: 78svh; min-height: 440px; }
+.portrait img { object-position: var(--focus) 30%; transform: scale(var(--zoom, 1)); transform-origin: var(--focus) 30%; }
+
+.now { min-height: 100svh; display: grid; place-items: center; padding: 20svh var(--m); }
+.statement { width: min(62vw, 44rem); text-align: center; font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.25rem); line-height: 1.15; letter-spacing: -0.02em; font-weight: 500; }
+
+/* Their photos: one frame, the picture changes */
+.photos { padding: 10svh 0 20svh; }
+
+/* Work: full panels that slide over each other, one row at the midline */
+.panel { position: sticky; top: 0; height: 80svh; display: grid; grid-template-rows: 1fr auto 1fr; padding-inline: var(--m); }
+.row { grid-row: 2; display: grid; grid-template-columns: 10% 1fr auto; align-items: baseline; }
+.workTitle { font-size: clamp(1.375rem, 2vw, 1.875rem); font-weight: 500; letter-spacing: -0.015em; }
+.workTitle a { text-decoration: none; }
+.workTitle a:hover { text-decoration: underline; color: inherit; }
+.workSummary { grid-row: 3; align-self: start; margin-top: 2rem; margin-left: 10%; max-width: 30ch; }
+
+.record { position: relative; z-index: 11; padding: clamp(5rem, 10vw, 9rem) var(--m); }
+.recordGrid { display: grid; grid-template-columns: 33% 1fr; margin-bottom: 72px; }
+.recordGrid h2 { margin: 0; }
+.wide { grid-template-columns: 33% 1fr; }
+.wide dd { text-align: left !important; }
+
+.writing { position: relative; z-index: 11; padding: 0 var(--m) clamp(4rem, 8vw, 7rem); }
+
+@media (max-width: 760px) {
+  .hero { display: block; height: auto; }
+  .say { position: static; padding: 30svh 16px 0; }
+  .stack { position: static; transform: none; padding: 2rem 16px 0; }
+  .portrait { height: 56svh; min-height: 0; margin: 2.5rem 0 24svh; }
+  .statement { width: auto; font-size: 1.5rem; }
+  .panel { height: 82svh; grid-template-rows: 1fr auto auto; padding-bottom: 20px; }
+  .row { grid-template-columns: 1fr auto; }
+  .row > :first-child { order: 2; }
+  .workTitle { grid-column: 1 / -1; font-size: 1.375rem; }
+  .workSummary { grid-row: auto; margin: 1rem 0 0; }
+  .recordGrid { grid-template-columns: 1fr; gap: 1.25rem; }
+  .wide { grid-template-columns: 1fr; }
+}

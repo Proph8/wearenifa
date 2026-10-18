@@ -1,73 +1,47 @@
-# Welcome to your Lovable project
+# Nifa — wearnifa.com
 
-## Project info
+The family website of Nisham and Fazna (Ni + fa): essays, articles, blog posts, poems and photos, plus a portfolio page for each of us. Built with Next.js; everything you write is edited at **/keystatic** and saved as files in this repository.
 
-**URL**: https://lovable.dev/projects/45fb54ec-b2a7-4e23-a901-a3a502216d6e
+## Run it on your computer
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/45fb54ec-b2a7-4e23-a901-a3a502216d6e) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open http://localhost:3000. The editor is at http://localhost:3000/keystatic. On your computer it saves straight into the `content/` folder.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Posting
 
-**Use GitHub Codespaces**
+1. Go to `/keystatic` and choose **Posts → Add**.
+2. Pick what it is (essay, article, blog post, poem, photos or note), who wrote it, and the language.
+3. Write it, add a cover or photos if you like, and press **Save**.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Poems keep the line breaks you type, and an empty line starts a new stanza. Tick **Draft** to save something without showing it on the site.
 
-## What technologies are used for this project?
+## Adding a family member
 
-This project is built with:
+**Family members → Add**. The "Web address" becomes their page, so `amina` lives at `/amina`. Fill in what applies; empty sections are hidden. They can then be chosen as an author on posts and get their own "Work & projects" entries.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Where things live
 
-## How can I deploy this project?
+| What | Where |
+| --- | --- |
+| Posts, members, projects, home page text | `content/` |
+| Pictures uploaded through the editor | `public/media/` |
+| Editor setup (fields and collections) | `keystatic.config.ts` |
+| Pages | `app/(site)/` |
+| Colours, type and motion | `app/(site)/globals.css` |
 
-Simply open [Lovable](https://lovable.dev/projects/45fb54ec-b2a7-4e23-a901-a3a502216d6e) and click on Share -> Publish.
+Originals you want me to prepare for the site go in `photos-inbox/` (not committed).
 
-## Can I connect a custom domain to my Lovable project?
+## Going live on Vercel
 
-Yes it is!
+1. Import this repository in Vercel. Pushes to the `family-site` branch get preview links; the main site follows `main`.
+2. Set `SITE_URL` to the real address (`https://wearnifa.com`) so link previews on WhatsApp use the right images.
+3. Connect the editor to GitHub, once:
+   - With the dev server running, set `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG=pending` in `.env.local`, restart, and open `/keystatic`. Keystatic walks you through creating a GitHub App and writes the real values into `.env.local`.
+   - Copy `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` and `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` into Vercel's environment variables and redeploy.
+4. Anyone who should post needs a GitHub account with write access to this repository. They sign in at `yoursite/keystatic`; every save becomes a commit, and Vercel republishes the site in about a minute.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Old invitation links (`/bride/...`, `/groom/...`) redirect to `/fazna` and `/nisham`.

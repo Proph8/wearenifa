@@ -1,0 +1,16 @@
+.sheet { padding: clamp(3rem, 8vw, 7rem) var(--m) clamp(3rem, 6vw, 5rem); }
+.head { max-width: 75rem; }
+.title { font-size: clamp(2.5rem, 1.3rem + 4.5vw, 5.5rem); max-width: 16ch; }
+.meta { margin-top: 1.5rem; }
+.cover { margin: clamp(3rem, 6vw, 5rem) calc(var(--m) * -1) 0; }
+.body { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); margin-top: clamp(3rem, 6vw, 5rem); }
+.summary { grid-column: 1 / span 4; max-width: 22ch; }
+.body > :global(.reading) { grid-column: 6 / span 7; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: var(--gap); margin-top: clamp(4rem, 8vw, 7rem); }
+.gallery figure { max-width: 34rem; }
+.gallery figcaption { margin-top: 0.625rem; }
+.next { margin-top: clamp(5rem, 10vw, 9rem); font-size: clamp(1.25rem, 2.1vw, 1.875rem); letter-spacing: -0.015em; }
+@media (max-width: 900px) {
+  .summary, .body > :global(.reading) { grid-column: 1 / -1; }
+  .summary { margin-bottom: 2rem; max-width: none; }
+}
