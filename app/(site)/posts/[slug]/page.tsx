@@ -4,17 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
-import {
-  bodyNode,
-  byline,
-  formatDate,
-  getMembers,
-  getPost,
-  getPosts,
-  kindLabel,
-  renderableBody,
-  wordCount,
-} from "@/lib/content";
+import { ArrowRight } from "@/components/Icons";
+import { bodyNode, byline, formatDate, getMembers, getPost, getPosts, kindLabel, renderableBody, wordCount } from "@/lib/content";
 import styles from "./post.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -28,16 +19,25 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPost((await params).slug);
   if (!post) return {};
+  const members = await getMembers();
+  const names = post.authors
+    .map((a) => members.find((m) => m.slug === a)?.name)
+    .filter((n): n is string => Boolean(n));
   return {
     title: post.title,
     description: post.summary,
+    authors: names.map((name) => ({ name })),
+    alternates: { canonical: `/posts/${post.slug}` },
     openGraph: {
       type: "article",
       title: post.title,
       description: post.summary,
+      url: `/posts/${post.slug}`,
       publishedTime: post.date ?? undefined,
-      images: post.cover ? [{ url: post.cover, alt: post.coverAlt }] : undefined,
+      authors: names,
+      locale: post.language === "ml" ? "ml_IN" : "en_IN",
     },
+    twitter: { card: "summary_large_image", title: post.title, description: post.summary },
   };
 }
 
@@ -51,25 +51,42 @@ export default async function PostPage({ params }: Props) {
   const minutes = Math.max(1, Math.round(wordCount(node) / 220));
   const index = posts.findIndex((p) => p.slug === slug);
   const next = posts[index + 1] ?? posts[0];
+  const gallery = post.gallery.filter((g) => g.image);
+
+  const site = process.env.SITE_URL ?? "https://wearnifa.com";
+  const article = {
+    "@context": "https://schema.org",
+    "@type": post.kind === "poem" ? "CreativeWork" : "BlogPosting",
+    headline: post.title,
+    description: post.summary,
+    datePublished: post.date,
+    inLanguage: post.language,
+    url: `${site}/posts/${post.slug}`,
+    image: post.cover ? `${site}${post.cover}` : `${site}/posts/${post.slug}/opengraph-image`,
+    author: post.authors
+      .map((a) => members.find((m) => m.slug === a))
+      .filter(Boolean)
+      .map((m) => ({ "@type": "Person", name: m!.name, url: `${site}/${m!.slug}` })),
+    publisher: { "@type": "Organization", name: "Nifa", url: site },
+  };
 
   return (
-    <article className={`on-field ${styles.sheet}`}>
-      <header className={styles.head}>
-        <h1 className={`head ${styles.title}`} lang={post.language}>
+    <article className="container">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }} />
+      <header className={`rise ${styles.head}`}>
+        <h1 className="hero-title" lang={post.language} style={{ "--i": 0 } as React.CSSProperties}>
           {post.title}
         </h1>
-        <p className={`small ${styles.meta}`} data-reveal>
-          {kindLabel(post.kind)} by {byline(post.authors, members)}, {formatDate(post.date)}
-          {!poem && post.kind !== "photos" && <span className="muted"> · {minutes} min read</span>}
+        <p className="meta" style={{ "--i": 1 } as React.CSSProperties}>
+          {kindLabel(post.kind)} by {byline(post.authors, members)} · {formatDate(post.date)}
+          {!poem && post.kind !== "photos" && ` · ${minutes} min read`}
         </p>
       </header>
 
       {post.cover && (
-        <figure className={styles.cover} data-reveal>
-          <div className="pic drift" style={{ aspectRatio: "16 / 9" }}>
-            <Image src={post.cover} alt={post.coverAlt ?? ""} fill priority sizes="100vw" />
-          </div>
-        </figure>
+        <div className={`media scale-in ${styles.cover}`}>
+          <Image src={post.cover} alt={post.coverAlt || post.title} fill priority sizes="(max-width: 1200px) 100vw, 1200px" />
+        </div>
       )}
 
       <div className={styles.body}>
@@ -83,28 +100,29 @@ export default async function PostPage({ params }: Props) {
         </div>
       </div>
 
-      {post.gallery.length > 0 && (
+      {gallery.length > 0 && (
         <div className={styles.gallery}>
-          {post.gallery.map((g, i) =>
-            g.image ? (
-              <figure key={i} data-reveal style={{ "--i": i % 3 } as React.CSSProperties}>
-                <div className="pic" style={{ aspectRatio: "4 / 5" }}>
-                  <Image src={g.image} alt={g.alt} fill sizes="(max-width: 760px) 100vw, 40vw" />
-                </div>
-                {g.caption && <figcaption className="small muted">{g.caption}</figcaption>}
-              </figure>
-            ) : null,
-          )}
+          {gallery.map((g, i) => (
+            <figure key={i} data-reveal style={{ "--i": i % 3 } as React.CSSProperties}>
+              <div className="media" style={{ aspectRatio: "4 / 5" }}>
+                <Image src={g.image!} alt={g.alt} fill sizes="(max-width: 760px) 100vw, 400px" />
+              </div>
+              {g.caption && <figcaption className="meta" style={{ marginTop: "0.6rem" }}>{g.caption}</figcaption>}
+            </figure>
+          ))}
         </div>
       )}
 
       {next && next.slug !== post.slug && (
-        <nav className={styles.next} aria-label="Next piece">
-          <Link href={`/posts/${next.slug}`} className="lineup-row">
-            <span lang={next.language}>Next: {next.title}</span>
-            <span>{kindLabel(next.kind)}</span>
-            <span>{byline(next.authors, members)}</span>
-            <span>{formatDate(next.date, { day: undefined, month: "short" })}</span>
+        <nav className={styles.next} aria-label="Next piece" data-reveal>
+          <Link href={`/posts/${next.slug}`} className={`card ${styles.nextCard}`}>
+            <span className="meta">Read next · {kindLabel(next.kind)}</span>
+            <span className="subtitle" lang={next.language}>
+              {next.title}
+            </span>
+            <span className="link">
+              Open <ArrowRight />
+            </span>
           </Link>
         </nav>
       )}

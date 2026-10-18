@@ -43,3 +43,6 @@ next-env.d.ts
 # design inspector output and photo originals
 .taste-skill/
 photos-inbox/
+
+# agent skills installed locally
+.agents/

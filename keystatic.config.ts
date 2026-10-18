@@ -52,7 +52,11 @@ export default config({
           validation: { length: { max: 320 } },
         }),
         heroPhoto: image("Main family photo", "family", "Wide, landscape photo of the family."),
-        heroPhotoAlt: fields.text({ label: "Describe the main photo (for screen readers)" }),
+        heroPhotoAlt: fields.text({
+          label: "Describe the main photo",
+          description: "Read out by screen readers and used by search engines. Say who is in it and where.",
+          validation: { isRequired: true },
+        }),
         places: fields.text({
           label: "Sentence over the photos of where you're from",
           description: "Three short lines at most.",
@@ -61,7 +65,7 @@ export default config({
         gallery: fields.array(
           fields.object({
             image: image("Photo", "family"),
-            alt: fields.text({ label: "Describe the photo" }),
+            alt: fields.text({ label: "Describe the photo", validation: { isRequired: true } }),
             caption: fields.text({ label: "Caption" }),
             where: fields.select({
               label: "Where it appears",
@@ -104,6 +108,25 @@ export default config({
           defaultValue: 1,
           step: 0.1,
         }),
+        accent: fields.select({
+          label: "Their colour",
+          description: "Used for links and highlights on their pages.",
+          options: [
+            { label: "Cobalt", value: "cobalt" },
+            { label: "Fern", value: "fern" },
+            { label: "Ocean", value: "ocean" },
+            { label: "Amber", value: "amber" },
+          ],
+          defaultValue: "cobalt",
+        }),
+        tone: fields.select({
+          label: "Their page tone",
+          options: [
+            { label: "Light (paper)", value: "light" },
+            { label: "Dark (graphite)", value: "dark" },
+          ],
+          defaultValue: "light",
+        }),
         lit: fields.integer({
           label: "Letters of their name in the family name",
           description: "Nisham gives 2 (Ni), Fazna gives 2 (Fa). Use 0 if they're not part of it.",
@@ -112,6 +135,7 @@ export default config({
         order: fields.integer({ label: "Order on the home page", defaultValue: 10 }),
         showOnHome: fields.checkbox({ label: "Show on the home page", defaultValue: true }),
         now: fields.text({ label: "What they're doing now", multiline: true }),
+        email: fields.text({ label: "Email for the CV (optional)", description: "Shown on the printable CV only." }),
         links: fields.array(
           fields.object({ label: fields.text({ label: "Label" }), url: fields.url({ label: "Link" }) }),
           { label: "Links", itemLabel: (p) => p.fields.label.value || "Link" },
@@ -153,7 +177,7 @@ export default config({
         photos: fields.array(
           fields.object({
             image: image("Photo", "members"),
-            alt: fields.text({ label: "Describe the photo" }),
+            alt: fields.text({ label: "Describe the photo", validation: { isRequired: true } }),
             caption: fields.text({ label: "Caption" }),
           }),
           { label: "Photos on their page", itemLabel: (p) => p.fields.caption.value || p.fields.alt.value || "Photo" },
@@ -205,15 +229,16 @@ export default config({
         }),
         summary: fields.text({
           label: "Short summary",
-          description: "Shown in lists and in link previews. One or two sentences.",
+          description: "Shown in lists, in link previews and to search engines. One or two sentences, under 160 characters.",
           multiline: true,
+          validation: { isRequired: true, length: { max: 160 } },
         }),
         cover: image("Cover picture (optional)", "posts"),
-        coverAlt: fields.text({ label: "Describe the cover picture" }),
+        coverAlt: fields.text({ label: "Describe the cover picture", description: "Needed whenever there is a cover." }),
         gallery: fields.array(
           fields.object({
             image: image("Photo", "posts"),
-            alt: fields.text({ label: "Describe the photo" }),
+            alt: fields.text({ label: "Describe the photo", validation: { isRequired: true } }),
             caption: fields.text({ label: "Caption (optional)" }),
           }),
           { label: "Photos", itemLabel: (p) => p.fields.caption.value || p.fields.alt.value || "Photo" },

@@ -3,17 +3,17 @@ intro: >-
   We are Nifa: Nisham and Fazna. He builds AI products for businesses; she
   makes AI work inside one. We write essays, poems and articles, and keep our
   work here.
-heroPhoto: /media/family/home.jpg
-heroPhotoAlt: Fazna in a rose abaya and headscarf and Nisham in a rose shirt, standing together under green trees
+heroPhoto: /media/family/hillside.jpg
+heroPhotoAlt: Nisham and Fazna sitting on a green hillside with hills behind them, laughing
 places: Two people, one name, and the places we keep going back to.
 gallery:
   - image: /media/family/city-night.jpg
     alt: Fazna and Nisham sitting on a ledge in a city at night
     caption: A night out
     where: places
-  - image: /media/family/hillside.jpg
-    alt: Nisham and Fazna sitting on a green hillside, laughing
-    caption: The hills, on a slow afternoon
+  - image: /media/family/home.jpg
+    alt: Fazna in a rose abaya and headscarf and Nisham in a rose shirt, under green trees
+    caption: At home
     where: places
   - image: /media/family/tea-estate.jpg
     alt: Fazna in a wide hat and Nisham in a denim jacket among tea bushes

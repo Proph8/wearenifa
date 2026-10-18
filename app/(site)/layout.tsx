@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anek_Malayalam, Bricolage_Grotesque } from "next/font/google";
+import { Anek_Malayalam, Geist } from "next/font/google";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import Reveal from "@/components/Reveal";
@@ -7,24 +7,23 @@ import SiteHeader from "@/components/SiteHeader";
 import { getFamily, getMembers } from "@/lib/content";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin"],
-  axes: ["opsz", "wdth"],
-  variable: "--font-bricolage",
-  display: "swap",
-});
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
 
-// Only for Malayalam text; Latin always comes from Bricolage.
+// Only for Malayalam text; Latin always comes from Geist.
 const anek = Anek_Malayalam({ subsets: ["malayalam"], variable: "--font-anek", display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const family = await getFamily();
+  const [family, members] = await Promise.all([getFamily(), getMembers()]);
   const name = family?.name ?? "Nifa";
   return {
     metadataBase: new URL(process.env.SITE_URL ?? "https://wearnifa.com"),
-    title: { default: `We are ${name}`, template: `%s · ${name}` },
+    title: { default: `${name} — Nisham and Fazna`, template: `%s · ${name}` },
     description: family?.intro,
-    openGraph: { siteName: name, type: "website", locale: "en_IN", images: family?.heroPhoto ? [family.heroPhoto] : undefined },
+    applicationName: name,
+    authors: members.map((m) => ({ name: m.name, url: `/${m.slug}` })),
+    robots: { index: true, follow: true },
+    openGraph: { siteName: name, type: "website", locale: "en_IN", url: "/" },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -35,7 +34,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const items = [{ href: "/posts", label: "Writing" }, ...people];
 
   return (
-    <html lang="en" className={`${bricolage.variable} ${anek.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${geist.variable} ${anek.variable}`} suppressHydrationWarning>
       <head>
         {/* Lets scroll reveals hide content only while script is running. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
@@ -44,21 +43,52 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         <a className="skip" href="#main">
           Skip to content
         </a>
-        <SiteHeader name={name} items={items} barePaths={["/", ...people.map((p) => p.href)]} />
+        <SiteHeader name={name} items={people} />
         <ViewTransition>
           <main id="main">{children}</main>
         </ViewTransition>
         <footer className="site-footer">
-          <span>{name}, the family site of {people.map((p) => p.label).join(" and ")}</span>
-          <nav aria-label="Footer">
-            {items.map((i) => (
-              <Link key={i.href} href={i.href}>
-                {i.label}
-              </Link>
-            ))}
-            <Link href="/keystatic">Sign in</Link>
-          </nav>
-          <span className="end">wearnifa.com · {new Date().getFullYear()}</span>
+          <div className="container">
+            <div className="top">
+              <div>
+                <Link href="/" className="wordmark">
+                  <i aria-hidden="true" />
+                  {name}
+                </Link>
+                <p className="meta" style={{ marginTop: "0.9rem", maxWidth: "32ch" }}>
+                  {family?.intro}
+                </p>
+              </div>
+              <div>
+                <h4>Site</h4>
+                <ul>
+                  {items.map((i) => (
+                    <li key={i.href}>
+                      <Link href={i.href}>{i.label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4>Family</h4>
+                <ul>
+                  <li>
+                    <Link href="/keystatic">Sign in to post</Link>
+                  </li>
+                  <li>
+                    <a href="mailto:hello@wearnifa.com">hello@wearnifa.com</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div className="bottom">
+              <span>© {new Date().getFullYear()} {name}</span>
+              <span>wearnifa.com</span>
+            </div>
+            <div className="big" aria-hidden="true">
+              {name}
+            </div>
+          </div>
         </footer>
         <Reveal />
       </body>

@@ -1,50 +1,57 @@
-/* First screen on charcoal: name split to the corners, portrait on columns 10–12 */
-.hero { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); height: 100svh; min-height: 560px; }
-.say { position: absolute; left: calc(100% / 12 * 2); top: 40%; max-width: 30ch; }
-.say .lead + .lead { margin-top: 0.375rem; }
-.say :global(.button) { margin-top: 1.75rem; }
-.stack {
-  position: absolute; left: calc(100% / 12 * 7); top: 50%; transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: 0.375rem; font-size: var(--step-small);
-}
-.stack a { text-decoration: none; padding-block: 0.25rem; }
-.stack a:hover { text-decoration: underline; }
-.portrait { grid-column: 10 / 13; height: 78svh; min-height: 440px; }
-.portrait img { object-position: var(--focus) 30%; transform: scale(var(--zoom, 1)); transform-origin: var(--focus) 30%; }
+/* The split stage: a fixed picture on one side, a calm column on the other */
+.page { background: var(--paper); color: var(--ink); }
+.split { display: grid; grid-template-columns: 45fr 55fr; gap: 12px; padding: 0 12px; align-items: start; }
+.split > * { min-width: 0; }
 
-.now { min-height: 100svh; display: grid; place-items: center; padding: 20svh var(--m); }
-.statement { width: min(62vw, 44rem); text-align: center; font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.25rem); line-height: 1.15; letter-spacing: -0.02em; font-weight: 500; }
+.stage { position: sticky; top: 12px; height: calc(100svh - 24px); }
 
-/* Their photos: one frame, the picture changes */
-.photos { padding: 10svh 0 20svh; }
+.column { padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 4vw, 4.5rem) clamp(4rem, 8vw, 7rem); max-width: 46rem; }
+.column :global(.wrow) { grid-template-columns: 7rem minmax(0, 1fr) auto; }
 
-/* Work: full panels that slide over each other, one row at the midline */
-.panel { position: sticky; top: 0; height: 80svh; display: grid; grid-template-rows: 1fr auto 1fr; padding-inline: var(--m); }
-.row { grid-row: 2; display: grid; grid-template-columns: 10% 1fr auto; align-items: baseline; }
-.workTitle { font-size: clamp(1.375rem, 2vw, 1.875rem); font-weight: 500; letter-spacing: -0.015em; }
-.workTitle a { text-decoration: none; }
-.workTitle a:hover { text-decoration: underline; color: inherit; }
-.workSummary { grid-row: 3; align-self: start; margin-top: 2rem; margin-left: 10%; max-width: 30ch; }
+.head { display: grid; gap: 1rem; justify-items: start; }
+.name { font-size: clamp(2.5rem, 1.5rem + 3.6vw, 4.5rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1; text-wrap: balance; }
+.now { max-width: 42ch; color: var(--ink); }
+.actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+.links { display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; align-items: center; }
 
-.record { position: relative; z-index: 11; padding: clamp(5rem, 10vw, 9rem) var(--m); }
-.recordGrid { display: grid; grid-template-columns: 33% 1fr; margin-bottom: 72px; }
-.recordGrid h2 { margin: 0; }
-.wide { grid-template-columns: 33% 1fr; }
-.wide dd { text-align: left !important; }
+.block { margin-top: clamp(4.5rem, 9vw, 7.5rem); }
+.h { font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
+.rowHead { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem; }
 
-.writing { position: relative; z-index: 11; padding: 0 var(--m) clamp(4rem, 8vw, 7rem); }
+/* Work: names are the index */
+.index { margin-top: 1.25rem; }
+.indexLink { display: block; padding: 0.7rem 0; color: var(--ink); }
+.indexRow { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.indexName { font-size: clamp(1.625rem, 1.1rem + 2vw, 2.75rem); font-weight: 500; letter-spacing: -0.03em; line-height: 1.05; transition: color 200ms var(--ease), transform 300ms var(--ease-out); display: inline-block; }
+a.indexLink:hover .indexName { color: var(--accent); transform: translateX(0.2em); }
+.indexNote { display: block; margin-top: 0.4rem; max-width: 52ch; }
 
-@media (max-width: 760px) {
-  .hero { display: block; height: auto; }
-  .say { position: static; padding: 30svh 16px 0; }
-  .stack { position: static; transform: none; padding: 2rem 16px 0; }
-  .portrait { height: 56svh; min-height: 0; margin: 2.5rem 0 24svh; }
-  .statement { width: auto; font-size: 1.5rem; }
-  .panel { height: 82svh; grid-template-rows: 1fr auto auto; padding-bottom: 20px; }
-  .row { grid-template-columns: 1fr auto; }
-  .row > :first-child { order: 2; }
-  .workTitle { grid-column: 1 / -1; font-size: 1.375rem; }
-  .workSummary { grid-row: auto; margin: 1rem 0 0; }
-  .recordGrid { grid-template-columns: 1fr; gap: 1.25rem; }
-  .wide { grid-template-columns: 1fr; }
+/* About: a short letter */
+.letter { max-width: 34rem; }
+.letterPortrait { display: block; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; margin-bottom: 1.75rem; }
+.letterPortrait img { width: 100%; height: 100%; object-fit: cover; }
+.letterBody { font-size: 1.0625rem; line-height: 1.6; }
+.letterBody > * + * { margin-top: 1em; }
+.signoff { display: grid; gap: 0.15rem; margin-top: 2rem; font-size: 1.375rem; font-weight: 500; letter-spacing: -0.02em; }
+
+/* Record: one printed sheet */
+.sheet { background: var(--stone); border-radius: var(--radius); padding: clamp(1.5rem, 3.5vw, 3rem); }
+.group + .group { margin-top: 2.75rem; }
+.groupName { font-size: var(--text-sm); font-weight: 500; color: var(--ink-2); margin-bottom: 0.75rem; }
+.item { padding: 0.65rem 0; box-shadow: inset 0 1px 0 var(--line); }
+.item:first-child { box-shadow: none; padding-top: 0; }
+.itemRow { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.itemRow .meta { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.itemNote { display: block; margin-top: 0.2rem; max-width: 56ch; }
+.sheetFoot { margin-top: 2.5rem; }
+
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; gap: 0; padding: 0 12px; }
+  .stage { position: sticky; top: 0; height: 60svh; z-index: 0; }
+  .column {
+    position: relative; z-index: 1; max-width: none;
+    margin-top: -24px; padding: 2rem 1rem 4rem;
+    background: var(--paper); border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .column :global(.wrow) { grid-template-columns: 1fr auto; }
 }

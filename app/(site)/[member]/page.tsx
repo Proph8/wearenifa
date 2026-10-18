@@ -4,19 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
-import Corners from "@/components/Corners";
-import Frame from "@/components/Frame";
-import LineUp from "@/components/LineUp";
-import {
-  bodyNode,
-  getMember,
-  getMembers,
-  getPosts,
-  getProjects,
-  lineUpRows,
-  renderableBody,
-  splitName,
-} from "@/lib/content";
+import { ArrowRight, ArrowUpRight } from "@/components/Icons";
+import MixedRow from "@/components/MixedRow";
+import { CopyLink } from "@/components/ShareActions";
+import Stage from "@/components/Stage";
+import WritingList from "@/components/WritingList";
+import { bodyNode, getMember, getMembers, getPosts, getProjects, renderableBody, writingRows } from "@/lib/content";
 import styles from "./member.module.css";
 
 type Props = { params: Promise<{ member: string }> };
@@ -35,7 +28,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: m.name,
     description: `${m.role}. ${m.now ?? ""}`.trim(),
-    openGraph: { type: "profile", title: m.name, images: m.portrait ? [{ url: m.portrait, alt: m.name }] : undefined },
+    alternates: { canonical: `/${m.slug}` },
+    openGraph: { type: "profile", title: m.name, description: m.role, url: `/${m.slug}` },
+    twitter: { card: "summary_large_image", title: m.name, description: m.role },
   };
 }
 
@@ -48,165 +43,224 @@ export default async function MemberPage({ params }: Props) {
 
   const theirs = posts.filter((p) => p.authors.includes(slug));
   const bio = await bodyNode(m.bio);
-  const name = splitName(m);
   const first = m.shortName || m.name;
+  const photos = m.photos.filter((p) => p.image).map((p) => ({ image: p.image!, alt: p.alt }));
+  const stage = [m.portrait ? { image: m.portrait, alt: m.name } : null, ...photos.slice(0, 3)].filter(
+    (s): s is { image: string; alt: string } => Boolean(s),
+  );
+
+  const person = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: m.name,
+    jobTitle: m.role,
+    url: `https://wearnifa.com/${m.slug}`,
+    image: m.portrait ? `https://wearnifa.com${m.portrait}` : undefined,
+    address: m.location ? { "@type": "PostalAddress", addressLocality: m.location } : undefined,
+    sameAs: m.links.map((l) => l.url).filter(Boolean),
+    worksFor: m.experience[0]?.org ? { "@type": "Organization", name: m.experience[0].org } : undefined,
+  };
 
   return (
-    <>
-      <div className="poster">
-        <Corners
-          lit
-          solid
-          left={{ text: name.lit || name.first }}
-          right={{ text: name.lit ? name.rest : "" }}
-        />
-        <section className={styles.hero} aria-labelledby="name">
-          <div className={styles.say}>
-            <h1 id="name" className="lead">
+    <div className={`${styles.page} ${m.tone === "dark" ? "band-dark" : ""}`} data-accent={m.accent}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(person) }} />
+
+      <div className={styles.split}>
+        {/* The half that never moves */}
+        <aside className={styles.stage} aria-label={`Photos of ${first}`}>
+          <Stage shots={stage} priority />
+        </aside>
+
+        {/* The half that scrolls, in one narrow measure */}
+        <div className={styles.column}>
+          <header className={`rise ${styles.head}`}>
+            <h1 className={styles.name} style={at(0)}>
               {m.name}
             </h1>
-            <p className="lead muted">
+            <p className="meta" style={at(1)}>
               {m.role}
-              {m.location && `, ${m.location}`}
+              {m.location && ` · ${m.location}`}
             </p>
-            {theirs.length > 0 && (
-              <Link href="#writing" className="button">
-                Read {first}&rsquo;s writing
-              </Link>
+            {m.now && (
+              <p className={`lead ${styles.now}`} style={at(2)}>
+                {m.now}
+              </p>
             )}
-          </div>
-          {m.links.length > 0 && (
-            <nav className={styles.stack} aria-label={`${first} elsewhere`}>
-              {m.links.map((l) => (
-                <a key={l.url} href={l.url ?? "#"} rel="me noopener" target="_blank">
-                  {l.label}
+            <div className={styles.actions} style={at(3)}>
+              {theirs.length > 0 && (
+                <a href="#writing" className="btn">
+                  Read {first}&rsquo;s writing <ArrowRight />
                 </a>
-              ))}
-            </nav>
-          )}
-          <div className={`pic drift ${styles.portrait}`} style={{ "--focus": m.portraitFocus || "50%", "--zoom": m.portraitZoom ?? 1 } as React.CSSProperties}>
-            {m.portrait && <Image src={m.portrait} alt={m.name} fill priority sizes="(max-width: 760px) 100vw, 25vw" />}
-          </div>
-        </section>
+              )}
+              <Link href={`/${m.slug}/cv`} className="btn btn-ghost">
+                CV
+              </Link>
+              <CopyLink />
+            </div>
+            {m.links.length > 0 && (
+              <p className={`meta ${styles.links}`} style={at(4)}>
+                {m.links.map((l, i) => (
+                  <React.Fragment key={l.url}>
+                    {i > 0 && <span aria-hidden="true"> · </span>}
+                    <a href={l.url ?? "#"} rel="me noopener" target="_blank" className="link">
+                      {l.label} <ArrowUpRight />
+                    </a>
+                  </React.Fragment>
+                ))}
+              </p>
+            )}
+          </header>
 
-        {m.now && (
-          <section className={styles.now} aria-label="Now">
-            <p className={styles.statement} data-reveal>
-              {m.now}
+          {projects.length > 0 && (
+            <section className={styles.block} aria-labelledby="work">
+              <h2 id="work" className={styles.h}>
+                Work
+              </h2>
+              <ol className={styles.index}>
+                {projects.map((p, i) => {
+                  const inner = (
+                    <>
+                      <span className={styles.indexRow}>
+                        <span className={styles.indexName}>{p.title}</span>
+                        <span className="meta">{p.year}</span>
+                      </span>
+                      {p.summary && <span className={`muted ${styles.indexNote}`}>{p.summary}</span>}
+                    </>
+                  );
+                  return (
+                    <li key={p.slug} data-reveal style={at(i % 4)}>
+                      {p.link ? (
+                        <a href={p.link} target="_blank" rel="noopener" className={styles.indexLink}>
+                          {inner}
+                        </a>
+                      ) : (
+                        <div className={styles.indexLink}>{inner}</div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          )}
+
+          <section className={`${styles.block} ${styles.letter}`} aria-label={`About ${first}`} data-reveal>
+            {m.portrait && (
+              <span className={styles.letterPortrait}>
+                <Image src={m.portrait} alt="" width={44} height={44} />
+              </span>
+            )}
+            <div className={styles.letterBody}>{Markdoc.renderers.react(renderableBody(bio), React)}</div>
+            <p className={styles.signoff}>
+              <span>{first}</span>
+              <span className="meta">{m.role}</span>
             </p>
           </section>
-        )}
-      </div>
 
-      {m.photos.some((p) => p.image) && (
-        <section className={styles.photos} aria-label={`Photos of ${first}`} data-reveal>
-          <Frame shots={m.photos.filter((p) => p.image).map((p) => ({ image: p.image!, alt: p.alt, caption: p.caption }))} />
-        </section>
-      )}
-
-      {projects.length > 0 && (
-        <section aria-label="Work">
-          {projects.map((p, i) => (
-            <article key={p.slug} className={`${styles.panel} ${i % 2 ? "on-field" : "on-surface"}`}>
-              <div className={styles.row}>
-                <span className="small">{p.year}</span>
-                <h2 className={styles.workTitle}>
-                  {p.link ? (
-                    <a href={p.link} target="_blank" rel="noopener">
-                      {p.title}
-                    </a>
-                  ) : (
-                    p.title
-                  )}
-                </h2>
-                <span className="small">{p.link ? new URL(p.link).hostname.replace(/^www\./, "") : i === 0 ? "Work" : ""}</span>
-              </div>
-              {p.summary && (
-                <p className={`lead ${styles.workSummary}`} data-reveal>
-                  {p.summary}
-                </p>
-              )}
-            </article>
-          ))}
-        </section>
-      )}
-
-      <section className={`on-field ${styles.record}`} aria-label={`About ${first}`}>
-        <div className={styles.recordGrid}>
-          <h2 className="lineup lineup-group">About</h2>
-          <div className="reading" data-reveal>
-            {Markdoc.renderers.react(renderableBody(bio), React)}
-          </div>
-        </div>
-
-        {m.experience.length > 0 && (
-          <div className="lineup">
-            <h2 className="lineup-group">Path</h2>
-            <ol>
-              {m.experience.map((e, i) => (
-                <li key={i} className="lineup-row" data-reveal style={at(i % 4)}>
-                  <span>{e.title}</span>
-                  <span>{e.org}</span>
-                  <span>{e.place}</span>
-                  <span>{e.start ? `${e.start} – ${e.end || "now"}` : "now"}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
-
-        {m.skillGroups.length > 0 && (
-          <div className="lineup">
-            <h2 className="lineup-group">Skills</h2>
-            <dl>
-              {m.skillGroups.map((g, i) => (
-                <div key={g.label} className={`lineup-row ${styles.wide}`} data-reveal style={at(i)}>
-                  <dt>{g.label}</dt>
-                  <dd>{g.items}</dd>
+          {(m.experience.length > 0 || m.education.length > 0 || m.skillGroups.length > 0 || m.certifications.length > 0) && (
+            <section className={`${styles.block} ${styles.sheet}`} aria-label="Record" data-reveal>
+              {m.experience.length > 0 && (
+                <div className={styles.group}>
+                  <h2 className={styles.groupName}>Path</h2>
+                  <ol>
+                    {m.experience.map((e, i) => (
+                      <li key={i} className={styles.item}>
+                        <span className={styles.itemRow}>
+                          <span>
+                            <strong>{e.title}</strong>, {e.org}
+                          </span>
+                          <span className="meta">{e.start ? `${e.start} – ${e.end || "now"}` : "now"}</span>
+                        </span>
+                        {(e.place || e.note) && (
+                          <span className={`meta ${styles.itemNote}`}>{[e.place, e.note].filter(Boolean).join(" · ")}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-              ))}
-            </dl>
-          </div>
-        )}
+              )}
+              {m.education.length > 0 && (
+                <div className={styles.group}>
+                  <h2 className={styles.groupName}>Studied</h2>
+                  <ul>
+                    {m.education.map((e) => (
+                      <li key={e.course} className={styles.item}>
+                        <span className={styles.itemRow}>
+                          <span>
+                            <strong>{e.course}</strong>, {e.school}
+                          </span>
+                          <span className="meta">{e.years}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {m.skillGroups.length > 0 && (
+                <div className={styles.group}>
+                  <h2 className={styles.groupName}>Skills</h2>
+                  <ul>
+                    {m.skillGroups.map((g) => (
+                      <li key={g.label} className={styles.item}>
+                        <span className={styles.itemRow}>
+                          <strong>{g.label}</strong>
+                        </span>
+                        <span className={`meta ${styles.itemNote}`}>{g.items}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {m.certifications.length > 0 && (
+                <div className={styles.group}>
+                  <h2 className={styles.groupName}>Certificates</h2>
+                  <ul>
+                    {m.certifications.map((c) => (
+                      <li key={c.name} className={styles.item}>
+                        <span className={styles.itemRow}>
+                          <span>{c.name}</span>
+                          <span className="meta">{c.date}</span>
+                        </span>
+                        <span className={`meta ${styles.itemNote}`}>{c.issuer}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <p className={`meta ${styles.sheetFoot}`}>
+                <Link href={`/${m.slug}/cv`} className="link">
+                  The same as a one-page CV <ArrowRight />
+                </Link>
+              </p>
+            </section>
+          )}
 
-        {m.education.length > 0 && (
-          <div className="lineup">
-            <h2 className="lineup-group">Studied</h2>
-            <ul>
-              {m.education.map((e, i) => (
-                <li key={e.course} className="lineup-row" data-reveal style={at(i)}>
-                  <span>{e.course}</span>
-                  <span>{e.school}</span>
-                  <span />
-                  <span>{e.years}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          {photos.length > 0 && (
+            <section className={styles.block} aria-labelledby="photos">
+              <div className={styles.rowHead}>
+                <h2 id="photos" className={styles.h}>
+                  Photos
+                </h2>
+                <span className="meta">{photos.length}</span>
+              </div>
+              <MixedRow shots={photos} label={`Photos of ${first}`} />
+            </section>
+          )}
 
-        {m.certifications.length > 0 && (
-          <div className="lineup">
-            <h2 className="lineup-group">Certificates</h2>
-            <ul>
-              {m.certifications.map((c, i) => (
-                <li key={c.name} className="lineup-row" data-reveal style={at(i % 4)}>
-                  <span>{c.name}</span>
-                  <span>{c.issuer}</span>
-                  <span />
-                  <span>{c.date}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
-
-      {theirs.length > 0 && (
-        <section id="writing" className={`on-field ${styles.writing}`} aria-label={`${first}'s writing`}>
-          <LineUp rows={lineUpRows(theirs, members)} people={[]} kinds={[]} />
-        </section>
-      )}
-    </>
+          {theirs.length > 0 && (
+            <section id="writing" className={styles.block} aria-labelledby="their-writing">
+              <div className={styles.rowHead}>
+                <h2 id="their-writing" className={styles.h}>
+                  Writing
+                </h2>
+                <Link href="/posts" className="link">
+                  Everyone&rsquo;s <ArrowRight />
+                </Link>
+              </div>
+              <WritingList rows={writingRows(theirs, members)} people={[]} kinds={[]} />
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

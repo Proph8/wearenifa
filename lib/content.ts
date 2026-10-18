@@ -93,16 +93,16 @@ export function byline(authors: readonly (string | null)[], members: Member[]) {
   return names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : (names[0] ?? "");
 }
 
-export function lineUpRows(posts: Post[], members: Member[]) {
+export function writingRows(posts: Post[], members: Member[]) {
   return posts.map((p) => ({
     slug: p.slug,
     title: p.title,
+    summary: p.summary ?? "",
     kind: p.kind,
     kindLabel: kindLabel(p.kind),
     authors: p.authors.filter((a): a is string => Boolean(a)),
     byline: byline(p.authors, members),
-    year: (p.date ?? "").slice(0, 4),
-    when: formatDate(p.date, { day: undefined, year: undefined, month: "short" }),
+    when: formatDate(p.date, { day: undefined, month: "short" }),
     lang: p.language,
   }));
 }
