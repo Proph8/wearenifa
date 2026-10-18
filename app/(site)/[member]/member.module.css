@@ -1,0 +1,57 @@
+/* The split stage: a fixed picture on one side, a calm column on the other */
+.page { background: var(--paper); color: var(--ink); }
+.split { display: grid; grid-template-columns: 45fr 55fr; gap: 12px; padding: 0 12px; align-items: start; }
+.split > * { min-width: 0; }
+
+.stage { position: sticky; top: 12px; height: calc(100svh - 24px); }
+
+.column { padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 4vw, 4.5rem) clamp(4rem, 8vw, 7rem); max-width: 46rem; }
+.column :global(.wrow) { grid-template-columns: 7rem minmax(0, 1fr) auto; }
+
+.head { display: grid; gap: 1rem; justify-items: start; }
+.name { font-size: clamp(2.5rem, 1.5rem + 3.6vw, 4.5rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1; text-wrap: balance; }
+.now { max-width: 42ch; color: var(--ink); }
+.actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+.links { display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; align-items: center; }
+
+.block { margin-top: clamp(4.5rem, 9vw, 7.5rem); }
+.h { font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
+.rowHead { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem; }
+
+/* Work: names are the index */
+.index { margin-top: 1.25rem; }
+.indexLink { display: block; padding: 0.7rem 0; color: var(--ink); }
+.indexRow { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.indexName { font-size: clamp(1.625rem, 1.1rem + 2vw, 2.75rem); font-weight: 500; letter-spacing: -0.03em; line-height: 1.05; transition: color 200ms var(--ease), transform 300ms var(--ease-out); display: inline-block; }
+a.indexLink:hover .indexName { color: var(--accent); transform: translateX(0.2em); }
+.indexNote { display: block; margin-top: 0.4rem; max-width: 52ch; }
+
+/* About: a short letter */
+.letter { max-width: 34rem; }
+.letterPortrait { display: block; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; margin-bottom: 1.75rem; }
+.letterPortrait img { width: 100%; height: 100%; object-fit: cover; }
+.letterBody { font-size: 1.0625rem; line-height: 1.6; }
+.letterBody > * + * { margin-top: 1em; }
+.signoff { display: grid; gap: 0.15rem; margin-top: 2rem; font-size: 1.375rem; font-weight: 500; letter-spacing: -0.02em; }
+
+/* Record: one printed sheet */
+.sheet { background: var(--stone); border-radius: var(--radius); padding: clamp(1.5rem, 3.5vw, 3rem); }
+.group + .group { margin-top: 2.75rem; }
+.groupName { font-size: var(--text-sm); font-weight: 500; color: var(--ink-2); margin-bottom: 0.75rem; }
+.item { padding: 0.65rem 0; box-shadow: inset 0 1px 0 var(--line); }
+.item:first-child { box-shadow: none; padding-top: 0; }
+.itemRow { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.itemRow .meta { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.itemNote { display: block; margin-top: 0.2rem; max-width: 56ch; }
+.sheetFoot { margin-top: 2.5rem; }
+
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; gap: 0; padding: 0 12px; }
+  .stage { position: sticky; top: 0; height: 60svh; z-index: 0; }
+  .column {
+    position: relative; z-index: 1; max-width: none;
+    margin-top: -24px; padding: 2rem 1rem 4rem;
+    background: var(--paper); border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .column :global(.wrow) { grid-template-columns: 1fr auto; }
+}
