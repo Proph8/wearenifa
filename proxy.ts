@@ -4,16 +4,18 @@ import { FAMILY_COOKIE, editorAvailable, hasFamilyCookie } from "@/lib/family-ga
 // Guards the editor and its API. Two layers: this family passphrase, then Keystatic's
 // own GitHub sign-in, which only lets repository collaborators save anything.
 export function proxy(request: NextRequest) {
-  if (!editorAvailable()) {
-    return new NextResponse("Not found", { status: 404 });
-  }
-
   const secret = process.env.FAMILY_PASSPHRASE;
-  if (!secret) {
-    // Never expose the editor in production without the passphrase set.
-    if (process.env.NODE_ENV === "production") return new NextResponse("Not found", { status: 404 });
-    return NextResponse.next();
+  const configured = editorAvailable() && (secret || process.env.NODE_ENV !== "production");
+
+  if (!configured) {
+    // The API stays closed; the page explains what is still missing.
+    if (request.nextUrl.pathname.startsWith("/api/")) return new NextResponse("Not found", { status: 404 });
+    const url = request.nextUrl.clone();
+    url.pathname = "/sign-in";
+    url.search = "?setup=1";
+    return NextResponse.redirect(url);
   }
+  if (!secret) return NextResponse.next(); // development, no passphrase set
 
   if (hasFamilyCookie(request.cookies.get(FAMILY_COOKIE)?.value, secret)) {
     return NextResponse.next();

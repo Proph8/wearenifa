@@ -52,6 +52,12 @@ Originals you want me to prepare for the site go in `photos-inbox/` (not committ
 3. Connect the editor to GitHub, once:
    - With the dev server running, set `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG=pending` in `.env.local`, restart, and open `/keystatic`. Keystatic walks you through creating a GitHub App and writes the real values into `.env.local`.
    - Copy `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` and `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` into Vercel's environment variables and redeploy.
-4. Anyone who should post needs a GitHub account with write access to this repository. They sign in at `yoursite/keystatic`; every save becomes a commit, and Vercel republishes the site in about a minute.
+4. Anyone who should post needs a GitHub account with write access to this repository. Add them on GitHub under **Settings → Collaborators → Add people** (role: Write), or from a terminal:
+
+   ```bash
+   gh api -X PUT repos/Proph8/love-story-selector-site-01/collaborators/THEIR_GITHUB_USERNAME -f permission=push
+   ```
+
+   They accept the invitation email, then sign in at `yoursite/keystatic` with the family passphrase and their GitHub account. Every save becomes a commit, and Vercel republishes the site in about a minute.
 
 Old invitation links (`/bride/...`, `/groom/...`) redirect to `/fazna` and `/nisham`.

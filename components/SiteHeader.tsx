@@ -53,7 +53,7 @@ export default function SiteHeader({ name, items }: { name: string; items: Item[
                 {item.label}
               </Link>
             ))}
-            <Link href="/posts" className="btn" aria-current={current("/posts")}>
+            <Link href="/posts" className="btn btn-ghost" aria-current={current("/posts")}>
               Writing
             </Link>
           </nav>
